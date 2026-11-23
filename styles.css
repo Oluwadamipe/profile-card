@@ -1,0 +1,272 @@
+/* ==========================================================
+   1. DESIGN TOKENS
+   Like Figma variables / styles: define once, reuse everywhere.
+   ========================================================== */
+:root {
+  /* Colours */
+  --color-page:        #f1f0f7;
+  --color-card:        #ffffff;
+  --color-text:        #1c1b29;
+  --color-text-muted:  #6b6a80;
+  --color-accent:      #e8590c;
+  --color-accent-soft: #fdede3;
+  --color-on-accent:   #ffffff;   /* text/icons sitting on the accent colour */
+  --color-border:      #e6e5ef;
+  --gradient-cover: linear-gradient(135deg, #e8590c, #f9a76c 60%, #f07c9b);
+
+  /* Type */
+  --font: "Inter", system-ui, sans-serif;
+
+  /* Spacing scale (like an 8pt grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+
+  /* Corner radius & shadow */
+  --radius-card: 24px;
+  --radius-pill: 999px;
+  --shadow-card: 0 20px 50px rgba(28, 27, 41, 0.12);
+}
+
+/* Dark mode: same tokens, different values.
+   Switched on when the page has data-theme="dark" (set by the toggle). */
+:root[data-theme="dark"] {
+  --color-page:        #12111c;
+  --color-card:        #1d1c2b;
+  --color-text:        #f3f2fa;
+  --color-text-muted:  #a3a2b8;
+  --color-accent:      #ff8a4c;   /* brighter orange so it glows on dark */
+  --color-accent-soft: #3a2419;   /* deep warm brown behind tags */
+  --color-on-accent:   #1d1c2b;   /* dark text on the bright orange */
+  --color-border:      #2f2e42;
+  --gradient-cover: linear-gradient(135deg, #b8460a, #c97a45 60%, #b85571);
+  --shadow-card: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================================
+   2. BASE — the "page" frame
+   ========================================================== */
+* {
+  box-sizing: border-box;   /* sizes include padding, like Figma */
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;      /* centre the card on the page */
+  padding: var(--space-3);
+  background: var(--color-page);
+  font-family: var(--font);
+  color: var(--color-text);
+  transition: background 0.3s ease, color 0.3s ease;   /* smooth theme switch */
+}
+
+/* ==========================================================
+   3. THE CARD — the main frame (Auto Layout: vertical, centred)
+   ========================================================== */
+.card {
+  position: relative;       /* lets the toggle pin to the card's corner */
+  width: 100%;
+  max-width: 380px;
+  background: var(--color-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;         /* "clip content" */
+  padding-bottom: var(--space-5);
+  transition: background 0.3s ease;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.card__cover {
+  width: 100%;
+  height: 110px;
+  background: var(--gradient-cover);
+}
+
+/* Theme switch — pinned to the card's top-right corner,
+   like a frame with "absolute position" in Figma.
+   Anatomy:  [ track  ( knob ) ☀  ☾ ]  — the knob slides under the active icon. */
+.theme-toggle {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 68px;
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.25);   /* frosted glass track over the cover */
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;          /* sun left, moon right */
+  transition: background 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.38);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* The knob: a white circle that sits under the active icon */
+.theme-toggle__knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);   /* "ease out" slide */
+}
+
+[data-theme="dark"] .theme-toggle__knob {
+  transform: translateX(32px);   /* slide right, under the moon */
+}
+
+/* Both icons always visible; the one on the knob takes the accent colour */
+.theme-toggle__icon {
+  position: relative;            /* sits above the knob */
+  width: 16px;
+  height: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  transition: color 0.3s ease;
+}
+
+.theme-toggle .icon-sun,
+[data-theme="dark"] .theme-toggle .icon-moon {
+  color: var(--color-accent);
+}
+
+[data-theme="dark"] .theme-toggle .icon-sun {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.card__avatar {
+  width: 96px;
+  height: 96px;
+  margin-top: -48px;        /* pull up so it overlaps the cover */
+  border-radius: 50%;
+  border: 4px solid var(--color-card);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: 40px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+.card__name {
+  margin-top: var(--space-3);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.card__role {
+  margin-top: var(--space-1);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-accent);
+}
+
+.card__bio {
+  margin-top: var(--space-3);
+  padding: 0 var(--space-4);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+/* Tags — Auto Layout: horizontal, wrap, 8px gap */
+.card__tags {
+  list-style: none;
+  margin-top: var(--space-4);
+  padding: 0 var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.card__tags li {
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Stats — three equal columns with dividers */
+.card__stats {
+  width: calc(100% - 2 * var(--space-4));
+  margin-top: var(--space-4);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.card__stats div + div {
+  border-left: 1px solid var(--color-border);
+}
+
+.card__stats strong {
+  display: block;
+  font-size: 20px;
+}
+
+.card__stats span {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+/* Buttons — two side by side, equal width */
+.card__actions {
+  width: 100%;
+  margin-top: var(--space-4);
+  padding: 0 var(--space-4);
+  display: flex;
+  gap: var(--space-2);
+}
+
+.button {
+  flex: 1;                  /* "fill container" */
+  padding: 12px var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);   /* hover state: lift slightly */
+}
+
+.button--primary {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.button--secondary {
+  background: transparent;
+  color: var(--color-text);
+  border: 0.5px solid var(--color-border);
+}
